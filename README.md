@@ -1,5 +1,26 @@
 # 🏡 Real Estate Sales Analysis (2021–2023)
 
+# 📚 Table of Contents
+
+- [🏡 Project Overview](#-project-overview)
+- [🎯 Objective](#-objective)
+- [🗂️ Data Source](#️-data-source)
+- [🛠️ Tools & Techniques Used](#️-tools--techniques-used)
+- [🧹 Data Cleaning & Preparation](#-data-cleaning--preparation)
+- [📊 Exploratory Data Analysis (EDA)](#-exploratory-data-analysis-eda)
+  - [Top Towns by Number of Sales](#top-towns-by-number-of-sales)
+  - [Top Towns by Total Sale Value](#top-towns-by-total-sale-value)
+  - [Average Sale Amount by Property Type](#average-sale-amount-by-property-type)
+  - [Sales Trend Over Time (2021–2023)](#sales-trend-over-time-2021–2023)
+  - [Sale Amount Distribution (Log Scale)](#sale-amount-distribution-log-scale)
+  - [Sale Amount vs Assessed Value](#sale-amount-vs-assessed-value)
+  - [Geographical Sales Concentration](#geographical-sales-concentration)
+- [📋 Tableau Dashboard](#-tableau-dashboard)
+- [🧠 Insights & Recommendations](#-insights--recommendations)
+- [✅ Conclusion & Decision-Making Insights](#-conclusion--decision-making-insights)
+- [🔭 Future Enhancements](#-future-enhancements)
+- [📚 References](#-references)
+
 A data analysis and visualization project focused on property sales trends across towns and property types, using Python and Tableau.
 
 ---
@@ -54,6 +75,62 @@ Python was used for data cleaning and feature engineering, while Tableau was use
   - `Log Sale Amount` (for better distribution visualization)
 
 ---
+## Data Analysis
+**Load the Dataset and Inspect Basic Info**
+```Python
+import pandas as pd
+
+# Load dataset
+df = pd.read_csv("Real_Estate_Sales_2001-2022_GL.csv")
+
+# Preview the first few rows
+df.head()
+```
+
+** Convert Date Column & Clean Up Data Types**
+```Python
+# Convert 'Date Recorded' to datetime
+df['Date Recorded'] = pd.to_datetime(df['Date Recorded'], errors='coerce')
+
+# Trim string columns
+str_cols = df.select_dtypes(include='object').columns
+df[str_cols] = df[str_cols].apply(lambda x: x.str.strip())
+
+# Extract Year and Month from 'Date Recorded'
+df['Recorded Year'] = df['Date Recorded'].dt.year
+df['Recorded Month'] = df['Date Recorded'].dt.month
+```
+
+** Handle Missing Values**
+```Python
+# Check percentage of missing values
+missing_percent = df.isnull().mean().round(4) * 100
+print("Missing percentage per column:\n", missing_percent)
+
+# Drop low-value columns with excessive missing data
+df.drop(columns=['OPM remarks', 'Assessor Remarks'], inplace=True)
+
+# Fill missing 'Residential Type' and 'Non Use Code' with 'Unknown'
+df['Residential Type'] = df['Residential Type'].fillna('Unknown')
+df['Non Use Code'] = df['Non Use Code'].fillna('Unknown')
+```
+
+** Feature Engineering**
+```Python
+import numpy as np
+
+# 1. Price per $1000 Assessed Value
+df['Price per $1k Assessed'] = df['Sale Amount'] / (df['Assessed Value'] / 1000)
+
+# 2. Log of Sale Amount (for visualizations)
+df['Log Sale Amount'] = np.log1p(df['Sale Amount'])
+
+# 3. Extract Latitude and Longitude from the 'Location' column
+df[['Longitude', 'Latitude']] = df['Location'].str.extract(r'POINT \((-?\d+\.\d+)\s(-?\d+\.\d+)\)').astype(float)
+```
+
+
+
 
 ## 📊 Exploratory Data Analysis (EDA)
 
@@ -158,14 +235,29 @@ Ideal for investors targeting **luxury real estate**, high returns per property,
 
 ---
 
-## 📈 Insights & Findings
 
-- Urban towns dominate both in volume and total value
-- Apartments and Industrial properties lead in pricing, while Residential types dominate frequency(Sales).
-- Temporal and geographic patterns highlight **when** and **where** investment opportunities may exist.
-- The **Sales Ratio** (Assessed Value vs Sale Amount) varies heavily by town.
-- 2022 marked the market's peak post-pandemic.
-- Sales were heavily concentrated in major urban centers like Stamford and Greenwich.
+## ✅ Conclusion & Decision-Making Insights
+
+This project provided a comprehensive analysis of real estate sales trends in Connecticut from 2021 to 2023. Using Python for data preprocessing and Tableau for visualization, several critical insights emerged that can inform investment, development, and market strategies:
+
+- 🏘️ **Top Towns**: Stamford, Greenwich, and Westport dominate the high-value market segment, while Waterbury and Bridgeport drive transaction volume. Decision-makers can prioritize marketing, development, or investment efforts based on whether they target high turnover or high ticket value.
+
+- 🏢 **Property Types**: Apartments command the highest average sale prices, indicating strong demand for multifamily housing. Developers and investors may consider focusing future projects on apartments and industrial properties for higher returns.
+
+- 📅 **Temporal Trends**: The peak in sales activity during 2022 signals strong post-pandemic demand but also suggests potential cooling into 2023. Strategic timing around market cycles can maximize opportunities.
+
+- 📈 **Pricing Insights**: The log distribution of sale amounts reveals a highly skewed market where a small number of luxury transactions can distort average values. Analysts and investors should prefer medians over means when assessing typical sale behavior.
+
+- 🏷️ **Assessed vs Sale Value Relationship**: While there is a general positive correlation between assessed and actual sale values, inconsistencies suggest opportunities for identifying undervalued properties through deeper valuation modeling.
+
+- 🌍 **Geographical Focus**: Urban and coastal towns are the epicenters of real estate activity, making them critical regions for expansion, new project launches, or infrastructure investments.
+
+---
+
+**Final Recommendation**:  
+By aligning strategies with top-performing towns, focusing on high-yield property types like Apartments, and monitoring shifts in sales momentum post-2022, stakeholders can make informed, data-driven decisions to optimize their investments, development projects, or municipal planning.
+
+This analysis establishes a solid foundation for deeper predictive modeling and market forecasting in future phases.
 
 ---
 
@@ -180,7 +272,7 @@ The final dashboard presents interactive insights on:
 
 
 
-🔗 [View Full Tableau Dashboard on Tableau Public](#)  <!-- Replace with your link -->
+🔗 (https://public.tableau.com/app/profile/purrisima.matthew/viz/RealEstateSalesAnalysis-Visualization/Dashboard)
 
 
 ---
